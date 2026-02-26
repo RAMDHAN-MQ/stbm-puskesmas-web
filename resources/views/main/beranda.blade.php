@@ -99,8 +99,6 @@
 </div>
 
 <div class="row g-3 mt-3">
-
-    {{-- BAR CHART DESA --}}
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-header bg-success text-white">
@@ -111,8 +109,6 @@
             </div>
         </div>
     </div>
-
-    {{-- PIE CHART PILAR --}}
     <div class="col-md-4">
         <div class="card shadow-sm">
             <div class="card-header bg-success text-white">

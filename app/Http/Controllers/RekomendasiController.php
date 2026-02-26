@@ -94,10 +94,8 @@ class RekomendasiController extends Controller
         $filterTahun = $request->tahun;
         $desaId = $request->desa;
 
-        // Ambil daftar desa
         $daftarDesa = Wilayah::orderBy('desa')->get();
 
-        // Ambil daftar tahun unik
         $tahunList = DB::table('stbm')
             ->selectRaw('YEAR(created_at) as tahun')
             ->distinct()
@@ -106,10 +104,15 @@ class RekomendasiController extends Controller
 
         $timeseries = [];
         $desaDipilih = null;
+        $detailPerTahun = [];
+        $lastRasio = null;
+        $prevRasio = null;
 
         if ($desaId) {
-
             $desaDipilih = Wilayah::find($desaId);
+            $detailPerTahun = [];
+            $lastRasio = null;
+            $prevRasio = null;
 
             foreach ($tahunList as $tahun) {
 
@@ -123,6 +126,11 @@ class RekomendasiController extends Controller
 
                 if ($totalKK == 0) {
                     $timeseries[$tahun] = 0;
+                    $detailPerTahun[$tahun] = [
+                        'total' => 0,
+                        'layak' => 0,
+                        'rasio' => 0
+                    ];
                     continue;
                 }
 
@@ -134,6 +142,17 @@ class RekomendasiController extends Controller
                 $rasio = round(($layakKK / $totalKK) * 100, 2);
 
                 $timeseries[$tahun] = $rasio;
+
+                $detailPerTahun[$tahun] = [
+                    'total' => $totalKK,
+                    'layak' => $layakKK,
+                    'rasio' => $rasio
+                ];
+            }
+            if (count($timeseries) >= 2) {
+                $values = array_values($timeseries);
+                $lastRasio = end($values);
+                $prevRasio = $values[count($values) - 2];
             }
         }
 
@@ -142,7 +161,10 @@ class RekomendasiController extends Controller
             'tahunList',
             'desaId',
             'desaDipilih',
-            'timeseries'
+            'timeseries',
+            'detailPerTahun',
+            'lastRasio',
+            'prevRasio'
         ));
     }
 
@@ -152,7 +174,6 @@ class RekomendasiController extends Controller
         $pegawaiId = $request->pegawai_id;
         $tahun = $request->tahun;
 
-        // Ambil daftar tahun unik
         $tahunList = Stbm::where('pegawai_id', $pegawaiId)
             ->select(DB::raw('YEAR(created_at) as tahun'))
             ->distinct()
@@ -165,9 +186,6 @@ class RekomendasiController extends Controller
             $query->whereYear('created_at', $tahun);
         }
 
-        // ======================
-        // PER DESA
-        // ======================
         $perDesa = $query->select('wilayah_id', DB::raw('count(*) as total'))
             ->with('wilayah')
             ->groupBy('wilayah_id')
@@ -179,9 +197,6 @@ class RekomendasiController extends Controller
                 ];
             });
 
-        // ======================
-        // PILAR
-        // ======================
         $pilar = [];
 
         for ($i = 1; $i <= 5; $i++) {

@@ -43,6 +43,33 @@
 
 @if($desaDipilih)
 
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h6>Rasio Tahun Terakhir</h6>
+                <h3 class="text-success">{{ $lastRasio ?? 0 }}%</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h6>Perubahan</h6>
+                @if($lastRasio !== null && $prevRasio !== null)
+                    @php $selisih = $lastRasio - $prevRasio; @endphp
+                    <h3 class="{{ $selisih >= 0 ? 'text-success' : 'text-danger' }}">
+                        {{ $selisih >= 0 ? '+' : '' }}{{ $selisih }}%
+                    </h3>
+                @else
+                    <h3>-</h3>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-success text-white">
         <strong>Chart Timeseries Rasio Layak (%) - {{ $desaDipilih->desa }}</strong>
@@ -50,6 +77,45 @@
     <div class="card-body" style="height:300px;">
         <canvas id="timeSeriesChart"></canvas>
     </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-body p-4">
+        <table class="table table-bordered mb-0">
+            <thead class="table-success">
+                <tr>
+                    <th>Tahun</th>
+                    <th>Total KK</th>
+                    <th>KK Layak</th>
+                    <th>Rasio (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($detailPerTahun as $tahun => $data)
+                <tr>
+                    <td>{{ $tahun }}</td>
+                    <td>{{ $data['total'] }}</td>
+                    <td>{{ $data['layak'] }}</td>
+                    <td>{{ $data['rasio'] }}%</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="alert alert-warning mt-3">
+    @if($lastRasio !== null && $prevRasio !== null)
+        @php $selisih = $lastRasio - $prevRasio; @endphp
+
+        @if($selisih > 0)
+            Rasio kelayakan meningkat sebesar {{ $selisih }}% dibanding tahun sebelumnya.
+        @elseif($selisih < 0)
+            Rasio kelayakan menurun sebesar {{ abs($selisih) }}% dibanding tahun sebelumnya.
+        @else
+            Rasio kelayakan stabil dibanding tahun sebelumnya.
+        @endif
+    @endif
 </div>
 
 @endif
