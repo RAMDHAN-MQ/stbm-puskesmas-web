@@ -20,4 +20,9 @@ class Wilayah extends Model
     {
         return $this->hasMany(Stbm::class, 'wilayah_id');
     }
+
+    public function kk()
+    {
+        return $this->hasMany(Stbm::class, 'wilayah_id');
+    }
 }

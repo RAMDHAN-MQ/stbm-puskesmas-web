@@ -25,7 +25,7 @@ class PegawaiController extends Controller
     {
         $request->validate([
             'nama'     => 'required|string|max:255',
-            'nidn'     => 'required|numeric',
+            'nip'     => 'required|numeric',
             'email'    => 'required|email',
             'password' => 'required|min:6',
             'role'     => 'required|in:admin,pegawai',
@@ -42,7 +42,7 @@ class PegawaiController extends Controller
 
         User::create([
             'nama'     => $request->nama,
-            'nidn'     => $request->nidn,
+            'nip'     => $request->nip,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role,

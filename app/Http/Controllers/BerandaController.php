@@ -104,14 +104,14 @@ class BerandaController extends Controller
             }])
             ->get();
 
-        $dataTerakhir = Stbm::with('wilayah')
+        $dataTerakhir = Stbm::with('wilayah', 'kk')
             ->where('pegawai_id', $pegawaiId)
             ->latest()
             ->take(5)
             ->get()
             ->map(function ($item) {
                 return [
-                    'nama_kepala_kk' => $item->nama_kepala_kk,
+                    'nama_kepala_kk' => $item->kk->nama_kepala_kk ?? '-',
                     'desa' => $item->wilayah->desa ?? '-',
                     'tanggal' => $item->created_at->format('d-m-Y H:i'),
                 ];

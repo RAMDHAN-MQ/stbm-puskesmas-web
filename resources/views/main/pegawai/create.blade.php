@@ -30,12 +30,12 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">NIDN <span class="text-danger">*</span></label>
+        <label class="form-label">NIP <span class="text-danger">*</span></label>
         <input type="number"
-            name="nidn"
+            name="nip"
             class="form-control"
-            placeholder="Masukkan NIDN"
-            value="{{ old('nidn') }}">
+            placeholder="Masukkan NIP"
+            value="{{ old('nip') }}">
     </div>
 
     <div class="mb-3">

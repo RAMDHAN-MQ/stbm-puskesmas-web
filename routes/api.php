@@ -27,12 +27,11 @@ Route::get('/statistik', [RekomendasiController::class, 'statistik']);
 
 // riwayat
 Route::get('/stbm', [StbmController::class, 'indexHP']);
-Route::post('/stbm', [StbmController::class, 'storeHP']);
 Route::get('/stbm/{id}', [StbmController::class, 'showHP']);
 
 // STBM MOBILE
-// wilayah dropdown
-Route::get('/wilayah', [StbmController::class, 'wilayah']);
+// kk dropdown
+Route::get('/kk', [StbmController::class, 'kk']);
 
 // pertanyaan
 Route::get('/pertanyaan', [StbmController::class, 'pertanyaan']);

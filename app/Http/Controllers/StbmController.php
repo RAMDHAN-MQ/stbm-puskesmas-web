@@ -10,37 +10,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StbmExport;
+use App\Models\KK;
+use Illuminate\Support\Facades\Auth;
 
 class StbmController extends Controller
 {
     public function index()
     {
         $stbm = Stbm::with(['wilayah', 'pegawai'])->get();
-
-        $jumlah = Wilayah::leftJoin('stbm', 'wilayah.id', '=', 'stbm.wilayah_id')
-            ->select(
-                'wilayah.id',
-                'wilayah.desa',
-                DB::raw('COUNT(stbm.id) as total')
-            )
-            ->groupBy('wilayah.id', 'wilayah.desa')
-            ->orderBy('wilayah.desa')
-            ->get();
-
+        $kk = KK::all();
         $desa = Wilayah::orderBy('desa')->get();
 
-        return view('main.stbm.index', compact('stbm', 'jumlah', 'desa'));
+        return view('main.stbm.index', compact('stbm', 'kk', 'desa'));
     }
 
     public function view($id)
     {
         $stbm = Stbm::with([
+            'kk',
             'wilayah',
             'pegawai',
             'details.stbm'
         ])->findOrFail($id);
 
         return view('main.stbm.view', compact('stbm'));
+    }
+
+    public function destroy($id)
+    {
+        $stbm = Stbm::findOrFail($id);
+        $stbm->delete();
+
+        return redirect()
+            ->route('admin.stbm.index')
+            ->with('success', 'STBM berhasil dihapus');
     }
 
     public function selesai($id)
@@ -112,45 +115,39 @@ class StbmController extends Controller
 
     // STBM MOBILE
     // 1. Tampil semua STBM
-    public function indexHP()
+    public function indexHP(Request $request)
     {
-        $stbm = Stbm::with(['wilayah', 'pegawai'])
+        $pegawaiId = $request->pegawai_id;
+            
+        $stbm = Stbm::with(['wilayah', 'pegawai', 'kk'])
+            ->where('pegawai_id', $pegawaiId)
             ->latest()
             ->get();
 
         return response()->json($stbm);
     }
 
-    // 2. Tambah STBM
-    public function storeHP(Request $request)
-    {
-        $request->validate([
-            'wilayah' => 'required|string|max:255',
-            'status' => 'required|string|max:50',
-        ]);
-
-        $stbm = Stbm::createHP([
-            'wilayah' => $request->wilayah,
-            'status' => $request->status,
-        ]);
-
-        return response()->json($stbm, 201);
-    }
-
     // 3. Tampil STBM spesifik (opsional)
     public function showHP($id)
     {
-        $data = Stbm::with(['wilayah', 'pegawai'])
+        $data = Stbm::with(['wilayah', 'pegawai', 'kk'])
             ->findOrFail($id);
 
         return response()->json($data);
     }
 
-    // wilayah dropdown
-    public function wilayah()
+    // kk dropdown
+    public function kk()
     {
-        $wilayah = Wilayah::select('id', 'desa')->get();
-        return response()->json($wilayah);
+        $tahunIni = now()->year;
+
+        $kk = KK::with('wilayah')
+            ->whereDoesntHave('stbm', function ($query) use ($tahunIni) {
+                $query->whereYear('created_at', $tahunIni);
+            })
+            ->get();
+
+        return response()->json($kk);
     }
 
     // pertanyaan stbm pilar
@@ -170,11 +167,6 @@ class StbmController extends Controller
                 'pegawai_id' => $request->pegawai_id,
                 'wilayah_id' => $request->wilayah_id,
                 'no_kk' => $request->no_kk,
-                'nama_kepala_kk' => $request->nama_kepala_kk,
-                'rt' => $request->rt,
-                'rw' => $request->rw,
-                'jumlah_jiwa' => $request->jumlah_jiwa,
-                'jumlah_jiwa_menetap' => $request->jumlah_jiwa_menetap,
                 'status' => 'proses',
                 'created_at' => now(),
                 'updated_at' => now(),

@@ -7,11 +7,12 @@ use App\Http\Controllers\StbmController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\PetaController;
 use App\Http\Controllers\RekomendasiController;
+use App\Http\Controllers\KKController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('login');
-});
+})->name('login');
 
 // login
 Route::controller(AuthController::class)->group(function () {
@@ -44,6 +45,7 @@ Route::middleware(['auth','role:admin'])->group(function() {
         Route::get('stbm/view/{id}', 'view')->name('admin.stbm.view');
         Route::put('stbm/view/verifikasi/{id}', 'selesai')->name('admin.stbm.selesai');
         Route::get('stbm/export', 'export')->name('admin.stbm.export');
+        Route::delete('stbm/destroy/{id}', 'destroy')->name('admin.stbm.destroy');
     });
 
     Route::controller(WilayahController::class)->group(function () {
@@ -62,5 +64,14 @@ Route::middleware(['auth','role:admin'])->group(function() {
     Route::controller(RekomendasiController::class)->group(function () {
         Route::get('rekomendasi', 'index')->name('admin.rekomendasi.index');
         Route::get('rekomendasi/perdesa', 'perdesa')->name('admin.rekomendasi.perdesa');
+    });
+
+    Route::controller(KKController::class)->group(function () {
+        Route::get('KK', 'index')->name('admin.kk.index');
+        Route::get('KK/create', 'create')->name('admin.kk.create');
+        Route::post('KK/create/store', 'store')->name('admin.kk.store');
+        Route::get('KK/edit/{no_kk}', 'edit')->name('admin.kk.edit');
+        Route::put('KK/update/{no_kk}', 'update')->name('admin.kk.update');
+        Route::delete('KK/destroy/{no_kk}', 'destroy')->name('admin.kk.destroy');
     });
 });

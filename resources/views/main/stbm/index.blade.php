@@ -31,12 +31,12 @@
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $item->wilayah->desa ?? '-' }}</td>
                 <td>
-                    {{ str_pad($item->rt, 3, '0', STR_PAD_LEFT) }}
+                    {{ str_pad($item->kk->rt, 3, '0', STR_PAD_LEFT) }}
                     /
-                    {{ str_pad($item->rw, 3, '0', STR_PAD_LEFT) }}
+                    {{ str_pad($item->kk->rw, 3, '0', STR_PAD_LEFT) }}
                 </td>
                 <td>{{ $item->pegawai->nama ?? '-' }}</td>
-                <td>{{ $item->nama_kepala_kk ?? '-' }}</td>
+                <td>{{ $item->kk->nama_kepala_kk ?? '-' }}</td>
                 @if($item->status === 'selesai')
                 <td class="text-center"><span class="badge rounded-pill text-bg-success bg-opacity-25 text-success">{{ $item->status }}</span></td>
                 @else
@@ -72,7 +72,7 @@
                         </ul>
                     </div>
                     <form id="delete-form-{{ $item->id }}"
-                        action="{{ route('admin.pegawai.destroy', $item->id) }}"
+                        action="{{ route('admin.stbm.destroy', $item->id) }}"
                         method="POST" class="d-none">
                         @csrf
                         @method('DELETE')
@@ -81,6 +81,9 @@
             </tr>
             @empty
             <tr>
+                <td class="text-center text-muted">-</td>
+                <td class="text-center text-muted">-</td>
+                <td class="text-center text-muted">-</td>
                 <td class="text-center text-muted">-</td>
                 <td class="text-center text-muted">-</td>
                 <td class="text-center text-muted">-</td>

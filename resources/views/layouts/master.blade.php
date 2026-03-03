@@ -159,6 +159,12 @@
                 </li>
 
                 <li class="nav-item">
+                    <a href="{{ route('admin.kk.index') }}" class="nav-link">
+                        <i class="bi bi-card-heading me-2"></i> Kelola KK
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a href="{{ route('admin.pegawai.index') }}"
                         class="nav-link {{ request()->is('pegawai') ? 'active' : '' }}">
                         <i class="bi bi-person-badge me-2"></i> Kelola Pegawai

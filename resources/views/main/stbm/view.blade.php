@@ -41,24 +41,24 @@
             </tr>
             <tr>
                 <th>Kepala KK</th>
-                <td>{{ $stbm->nama_kepala_kk }}</td>
+                <td>{{ $stbm->kk->nama_kepala_kk ?? '-' }}</td>
             </tr>
             <tr>
                 <th>RT / RW</th>
                 <td>
-                    {{ str_pad($stbm->rt, 3, '0', STR_PAD_LEFT) }}
+                    {{ str_pad($stbm->kk->rt, 3, '0', STR_PAD_LEFT) }}
                     /
-                    {{ str_pad($stbm->rw, 3, '0', STR_PAD_LEFT) }}
+                    {{ str_pad($stbm->kk->rw, 3, '0', STR_PAD_LEFT) }}
                 </td>
             </tr>
 
             <tr>
                 <th>Jumlah Jiwa</th>
-                <td>{{ $stbm->jumlah_jiwa }}</td>
+                <td>{{ $stbm->kk->jumlah_jiwa ?? '-' }}</td>
             </tr>
             <tr>
                 <th>Jumlah Jiwa Menetap</th>
-                <td>{{ $stbm->jumlah_jiwa_menetap }}</td>
+                <td>{{ $stbm->kk->jumlah_jiwa_menetap ?? '-' }}</td>
             </tr>
             <tr>
                 <th>Status</th>

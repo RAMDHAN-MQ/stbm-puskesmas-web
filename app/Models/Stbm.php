@@ -13,12 +13,7 @@ class Stbm extends Model
     protected $fillable = [
         'pegawai_id',
         'no_kk',
-        'nama_kepala_kk',
         'wilayah_id',
-        'rt',
-        'rw',
-        'jumlah_jiwa',
-        'jumlah_jiwa_menetap',
         'status',
         'pilar_1',
         'pilar_2',
@@ -40,5 +35,10 @@ class Stbm extends Model
     public function wilayah()
     {
         return $this->belongsTo(Wilayah::class, 'wilayah_id');
+    }
+
+    public function kk()
+    {
+        return $this->belongsTo(KK::class, 'no_kk');
     }
 }
