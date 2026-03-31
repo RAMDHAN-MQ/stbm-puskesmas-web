@@ -12,14 +12,12 @@ class PetaController extends Controller
     {
         $filterTahun = $request->filter;
 
-        // Ambil daftar tahun
         $tahun = DB::table('stbm')
             ->selectRaw('YEAR(created_at) as tahun')
             ->distinct()
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
 
-        // Ambil wilayah + stbm sesuai filter
         $desas = Wilayah::with(['stbm' => function ($query) use ($filterTahun) {
             $query->where('status', 'selesai');
 
@@ -41,7 +39,6 @@ class PetaController extends Controller
 
             $totalKK = $kks->count();
 
-            // HITUNG SAMA SEPERTI REKOMENDASI
             $layakKK = $kks->filter(function ($kk) {
                 $pilar = [
                     $kk->pilar_1,

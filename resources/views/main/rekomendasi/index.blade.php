@@ -61,7 +61,7 @@
             @foreach($rekomendasi as $desa => $data)
             <tr>
                 <td>{{ $desa }}</td>
-                <td class="text-center">{{ $data['total_kk'] }}</td>
+                <td class="text-center">{{ $data['total_kk'] }} / {{ $data['semua_kk'] }}</td>
                 <td class="text-center">{{ $data['kk_layak'] }}</td>
                 <td class="text-center">{{ $data['kk_tidak_layak'] }}</td>
                 <td>

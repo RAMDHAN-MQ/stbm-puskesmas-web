@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Wilayah;
 use App\Models\Stbm;
+use App\Models\KK;
 use Illuminate\Support\Facades\DB;
 
 class RekomendasiController extends Controller
@@ -13,7 +14,6 @@ class RekomendasiController extends Controller
     {
         $filterTahun = $request->filter;
 
-        // Ambil daftar tahun unik dari tabel stbm
         $tahun = DB::table('stbm')
             ->selectRaw('YEAR(created_at) as tahun')
             ->distinct()
@@ -25,12 +25,12 @@ class RekomendasiController extends Controller
         $rekomendasi = [];
 
         foreach ($desas as $desa) {
+            $semuakk = KK::where('wilayah_id', $desa->id)->count();
 
             $query = DB::table('stbm')
                 ->where('wilayah_id', $desa->id)
                 ->where('status', 'selesai');
 
-            // Jika ada filter tahun
             if ($filterTahun) {
                 $query->whereYear('created_at', $filterTahun);
             }
@@ -42,6 +42,7 @@ class RekomendasiController extends Controller
             if ($totalKK == 0) {
                 $rekomendasi[$desa->desa] = [
                     'total_kk' => 0,
+                    'semua_kk' => $semuakk,
                     'kk_layak' => 0,
                     'kk_tidak_layak' => 0,
                     'status' => 'Belum Ada Data',
@@ -78,6 +79,7 @@ class RekomendasiController extends Controller
 
             $rekomendasi[$desa->desa] = [
                 'total_kk' => $totalKK,
+                'semua_kk' => $semuakk,
                 'kk_layak' => $layakKK,
                 'kk_tidak_layak' => $tidakLayakKK,
                 'status' => $status,
