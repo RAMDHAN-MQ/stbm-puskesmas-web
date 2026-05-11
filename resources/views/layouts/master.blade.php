@@ -120,8 +120,6 @@
 
 
             <ul class="nav flex-column mt-3">
-
-                <!-- LABEL: MAIN MENU -->
                 <li class="sidebar-label">Main Menu</li>
 
                 <li class="nav-item">

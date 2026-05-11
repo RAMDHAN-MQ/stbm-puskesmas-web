@@ -77,7 +77,6 @@
                 <td class="text-center text-muted">-</td>
                 <td class="text-center text-muted">-</td>
                 <td class="text-center text-muted">-</td>
-                <td class="text-center text-muted">-</td>
             </tr>
             @endforelse
         </tbody>

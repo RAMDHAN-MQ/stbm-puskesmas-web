@@ -111,7 +111,6 @@
                 <div class="modal-body">
                     <div class="row g-3">
 
-                        <!-- Desa -->
                         <div class="col-md-6">
                             <label class="form-label">Desa</label>
                             <select name="desa_id" class="form-select">
@@ -122,7 +121,6 @@
                             </select>
                         </div>
 
-                        <!-- Status -->
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select">
@@ -132,7 +130,6 @@
                             </select>
                         </div>
 
-                        <!-- Tanggal -->
                         <div class="col-md-6">
                             <label class="form-label">Dari Tanggal</label>
                             <input type="date" name="tanggal_mulai" class="form-control">

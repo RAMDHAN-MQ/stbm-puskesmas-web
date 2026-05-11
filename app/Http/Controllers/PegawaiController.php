@@ -87,7 +87,7 @@ class PegawaiController extends Controller
 
         $data = $request->validate([
             'nama' => 'required',
-            'nidn' => 'required',
+            'nip' => 'required',
             'email' => 'required|email',
             'role' => 'required',
             'password' => 'nullable|min:6',

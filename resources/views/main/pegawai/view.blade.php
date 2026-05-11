@@ -29,8 +29,8 @@
 
     <table class="table table-borderless">
         <tr>
-            <th width="150">NIDN</th>
-            <td>: {{ $user->nidn }}</td>
+            <th width="150">NIP</th>
+            <td>: {{ $user->nip }}</td>
         </tr>
         <tr>
             <th>Email</th>
