@@ -255,7 +255,7 @@
         </div>
     </section>
 
-    <section id="tentang" class="py-5 bg-white" data-aos="fade-up">
+    <section id="tentang" class="py-5" data-aos="fade-up">
         <div class="container">
 
             <div class="row align-items-center">
