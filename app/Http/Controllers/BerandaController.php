@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Wilayah;
 use App\Models\Stbm;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -32,31 +33,9 @@ class BerandaController extends Controller
             ->where('pilar_5', 'layak')
             ->count();
 
-        // ===== BAR CHART DESA =====
-        $desaData = Wilayah::with(['stbm' => function ($q) {
-            $q->where('status', 'selesai');
-        }])->get()->map(function ($wilayah) {
-            $layak = $wilayah->stbm->where(function ($q) {
-                return
-                    $q->pilar_1 === 'layak' &&
-                    $q->pilar_2 === 'layak' &&
-                    $q->pilar_3 === 'layak' &&
-                    $q->pilar_4 === 'layak' &&
-                    $q->pilar_5 === 'layak';
-            })->count();
 
-            $tidakLayak = $wilayah->stbm->count() - $layak;
-
-            return [
-                'desa' => $wilayah->desa,
-                'layak' => $layak,
-                'tidak_layak' => $tidakLayak,
-            ];
-        });
 
         // ===== PIE CHART PILAR =====
-        $totalSelesai = Stbm::where('status', 'selesai')->count();
-
         $pilarLayak = [];
         for ($i = 1; $i <= 5; $i++) {
             $pilarLayak[$i] = Stbm::where('status', 'selesai')
@@ -69,6 +48,72 @@ class BerandaController extends Controller
             ->take(3)
             ->get();
 
+        $desas = Wilayah::all();
+
+        $rekomendasi = [];
+
+        foreach ($desas as $desa) {
+
+            $query = Stbm::where('wilayah_id', $desa->id)
+                ->where('status', 'selesai')
+                ->whereYear('created_at', now()->year);
+
+            $kks = $query->get();
+
+            $totalKK = $kks->count();
+
+            if ($totalKK == 0) {
+
+                $rekomendasi[$desa->desa] = [
+                    'total_kk' => 0,
+                    'kk_layak' => 0,
+                    'kk_tidak_layak' => 0,
+                    'status' => 'Belum Ada Data'
+                ];
+
+                continue;
+            }
+
+            $layakKK = $kks->filter(function ($kk) {
+
+                $pilar = [
+                    $kk->pilar_1,
+                    $kk->pilar_2,
+                    $kk->pilar_3,
+                    $kk->pilar_4,
+                    $kk->pilar_5
+                ];
+
+                return count(array_unique($pilar)) === 1
+                    && $pilar[0] === 'layak';
+            })->count();
+
+            $tidakLayakKK = $totalKK - $layakKK;
+
+            $layakRatio = $layakKK / $totalKK;
+
+            if ($layakRatio >= 0.8) {
+                $status = 'Layak';
+            } elseif ($layakRatio >= 0.3) {
+                $status = 'Cukup';
+            } else {
+                $status = 'Tidak Layak';
+            }
+
+            $rekomendasi[$desa->desa] = [
+                'total_kk' => $totalKK,
+                'kk_layak' => $layakKK,
+                'kk_tidak_layak' => $tidakLayakKK,
+                'status' => $status
+            ];
+        }
+
+        $pegawaiChart = User::withCount('stbm')
+            ->where('role', 'pegawai')
+            ->orderByDesc('stbm_count')
+            ->take(10)
+            ->get();
+
         return view('main.beranda', compact(
             'total',
             'terbaru',
@@ -76,16 +121,16 @@ class BerandaController extends Controller
             'selesai',
             'layak',
             'tidakLayak',
-            'desaData',
             'pilarLayak',
-            'totalSelesai'
+            'rekomendasi',
+            'pegawaiChart'
         ));
     }
 
     // mobile beranda
     public function indexHP(Request $request)
     {
-        $pegawaiId = $request->pegawai_id; 
+        $pegawaiId = $request->pegawai_id;
 
         $totalData = Stbm::where('pegawai_id', $pegawaiId)->count();
 

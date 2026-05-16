@@ -7,6 +7,15 @@
 <div class="bg-white p-4 rounded-3 shadow-sm">
     <a class="btn btn-outline-success" href="{{ route('admin.kk.create') }}">+ Tambah</a>
     <hr>
+    <div class="col-md-3 mb-3">
+        <label class="form-label">Wilayah</label>
+        <select id="filterWilayah" class="form-select">
+            <option value="">Semua Wilayah</option>
+            @foreach($kk->unique('wilayah_id') as $d)
+            <option value="{{ $d->wilayah->desa }}">{{ $d->wilayah->desa }}</option>
+            @endforeach
+        </select>
+    </div>
 
     <table id="kkTable" class="table table-striped table-hover align-middle">
         <thead class="table-success">
@@ -89,7 +98,7 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        $('#kkTable').DataTable({
+        let table = $('#kkTable').DataTable({
             pagingType: "simple_numbers",
             language: {
                 search: "_INPUT_",
@@ -104,7 +113,12 @@
                 emptyTable: "Belum ada data"
             }
         });
+
+        $('#filterWilayah').on('change', function() {
+            table.column(2).search(this.value).draw();
+        });
     });
+
 </script>
 
 <script>

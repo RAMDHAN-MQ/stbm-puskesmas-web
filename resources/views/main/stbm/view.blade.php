@@ -120,6 +120,13 @@
             </tr>
             @endif
 
+            <tr>
+                <th>Bukti Pelaporan</th>
+                <td>
+                    <img src="" alt="Bukti Pelaporan">
+                </td>
+            </tr>
+
         </table>
 
         <hr>
@@ -137,13 +144,24 @@
             <div class="card-body">
                 @foreach ($details as $index => $detail)
                 <div class="mb-2">
-                    <strong>{{ $index + 1 }}. {{ $detail->pertanyaan->pertanyaan }}</strong><br>
+
+                    <strong>
+                        {{ $index + 1 }}.
+                        {{ $detail->pertanyaan->pertanyaan }}
+                    </strong>
+                    <br>
+
+                    @php
+                    $benar =
+                    ($detail->pertanyaan->is_negatif == 0 && $detail->jawaban == 'ya') ||
+                    ($detail->pertanyaan->is_negatif == 1 && $detail->jawaban == 'tidak');
+                    @endphp
 
                     Jawaban:
-                    <span class="badge 
-                    {{ $detail->jawaban == 'ya' ? 'bg-success' : 'bg-danger' }}">
+                    <span class="badge {{ $benar ? 'bg-success' : 'bg-danger' }}">
                         {{ strtoupper($detail->jawaban) }}
                     </span>
+
                     <hr>
                 </div>
                 @endforeach

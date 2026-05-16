@@ -20,9 +20,9 @@
                     <select name="filter" class="form-select shadow-sm" onchange="this.form.submit()">
                         <option value="">Semua Tahun</option>
                         @foreach($tahun as $t)
-                            <option value="{{ $t }}" {{ $filterTahun == $t ? 'selected' : '' }}>
-                                {{ $t }}
-                            </option>
+                        <option value="{{ $t }}" {{ $filterTahun == $t ? 'selected' : '' }}>
+                            {{ $t }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -31,14 +31,30 @@
     </div>
 </div>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-success text-white">
-        <strong>Rasio Layak Desa</strong>
+<div class="row g-3 mt-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <strong>Kondisi STBM per Desa</strong>
+            </div>
+            <div class="card-body" style="height:280px;">
+                <canvas id="rasioChart"></canvas>
+            </div>
+        </div>
     </div>
-    <div class="card-body" style="height:280px;">
-        <canvas id="rasioChart"></canvas>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <strong>Perbandingan KK Layak & Tidak Layak</strong>
+            </div>
+
+            <div class="card-body" style="height:280px;">
+                <canvas id="layakChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
+
 
 <div class="bg-white p-4 rounded-3 shadow-sm">
     <table class="table table-striped table-hover table-bordered align-middle">
@@ -124,9 +140,9 @@
 
     // Warna batang berdasarkan status
     const barColors = statusDesa.map(status => {
-        if (status === 'Layak') return 'rgba(25, 135, 84, 0.8)'; // hijau
-        if (status === 'Cukup') return 'rgba(255, 193, 7, 0.8)'; // kuning
-        if (status === 'Tidak Layak') return 'rgba(220, 53, 69, 0.8)'; // merah
+        if (status === 'Layak') return 'rgba(25, 135, 84, 0.8)';
+        if (status === 'Cukup') return 'rgba(255, 193, 7, 0.8)';
+        if (status === 'Tidak Layak') return 'rgba(220, 53, 69, 0.8)';
         return 'rgba(108, 117, 125, 0.8)'; // abu
     });
 
@@ -157,5 +173,76 @@
             }
         }
     });
+
+    // kk layak vs tidak layak
+    const layakLabels = @json(array_values(array_keys($rekomendasi)));
+
+    const dataLayak = @json(
+        array_values(array_map(fn($d) => $d['kk_layak'], $rekomendasi))
+    );
+
+    const dataTidakLayak = @json(
+        array_values(array_map(fn($d) => $d['kk_tidak_layak'], $rekomendasi))
+    );
+
+    const layakCtx = document.getElementById('layakChart').getContext('2d');
+
+    new Chart(layakCtx, {
+
+        type: 'bar',
+
+        data: {
+
+            labels: layakLabels,
+
+            datasets: [
+
+                {
+                    label: 'KK Layak',
+
+                    data: dataLayak,
+
+                    backgroundColor: 'rgba(25, 135, 84, 0.8)',
+
+                    borderRadius: 6
+                },
+
+                {
+                    label: 'KK Tidak Layak',
+
+                    data: dataTidakLayak,
+
+                    backgroundColor: 'rgba(220, 53, 69, 0.8)',
+
+                    borderRadius: 6
+                }
+            ]
+        },
+
+        options: {
+
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    position: 'false'
+                }
+            },
+
+            scales: {
+
+                x: {
+                    beginAtZero: true
+                },
+
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
 </script>
 @endpush

@@ -17,7 +17,9 @@ class StbmController extends Controller
 {
     public function index()
     {
-        $stbm = Stbm::with(['wilayah', 'pegawai'])->get();
+        $stbm = Stbm::with(['wilayah', 'pegawai'])
+        ->orderBy('created_at', 'desc')
+        ->get();
         $kk = KK::all();
         $desa = Wilayah::orderBy('desa')->get();
 

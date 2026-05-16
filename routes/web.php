@@ -8,9 +8,13 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\PetaController;
 use App\Http\Controllers\RekomendasiController;
 use App\Http\Controllers\KKController;
+use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+
+Route::get('/', [LandingPageController::class, 'index']);
+
+Route::get('/login', function () {
     return view('login');
 })->name('login');
 
@@ -22,7 +26,9 @@ Route::controller(AuthController::class)->group(function () {
 
 
 // WEBSITE ADMIN
-Route::middleware(['auth','role:admin'])->group(function() {
+Route::prefix('admin')
+    ->middleware(['auth', 'role:admin'])
+    ->group(function () {
 
     // Beranda
     Route::controller(BerandaController::class)->group(function () {

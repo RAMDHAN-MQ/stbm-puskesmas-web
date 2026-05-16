@@ -12,6 +12,41 @@
     </a>
     <hr>
 
+    <div class="row mb-3">
+
+        <div class="col-md-4">
+            <label class="form-label">Desa</label>
+            <select id="filterDesa" class="form-select">
+                <option value="">Semua Desa</option>
+                @foreach($desa as $d)
+                <option value="{{ $d->desa }}">{{ $d->desa }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Pegawai</label>
+            <select id="filterPegawai" class="form-select">
+                <option value="">Semua Pegawai</option>
+                @foreach($stbm->unique('pegawai_id') as $p)
+                <option value="{{ $p->pegawai->nama }}">
+                    {{ $p->pegawai->nama }}
+                </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <select id="filterStatus" class="form-select">
+                <option value="">Semua Status</option>
+                <option value="proses">proses</option>
+                <option value="selesai">selesai</option>
+            </select>
+        </div>
+
+    </div>
+
     <table id="stbmTable" class="table table-striped table-hover align-middle">
         <thead class="table-success">
             <tr>
@@ -116,7 +151,7 @@
                             <select name="desa_id" class="form-select">
                                 <option value="">Semua Desa</option>
                                 @foreach($desa as $d)
-                                    <option value="{{ $d->id }}">{{ $d->desa }}</option>
+                                <option value="{{ $d->id }}">{{ $d->desa }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -160,7 +195,8 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        $('#stbmTable').DataTable({
+
+        let table = $('#stbmTable').DataTable({
             pagingType: "simple_numbers",
             language: {
                 search: "_INPUT_",
@@ -174,6 +210,18 @@
                 zeroRecords: "Data tidak ditemukan",
                 emptyTable: "Belum ada data"
             }
+        });
+
+        $('#filterDesa').on('change', function() {
+            table.column(1).search(this.value).draw();
+        });
+
+        $('#filterPegawai').on('change', function() {
+            table.column(3).search(this.value).draw();
+        });
+
+        $('#filterStatus').on('change', function() {
+            table.column(5).search(this.value).draw();
         });
     });
 </script>

@@ -26,8 +26,11 @@
 
         .sidebar {
             width: 250px;
-            min-height: 100vh;
+            height: 100vh;
             background-color: #198754;
+
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .sidebar a {
@@ -48,6 +51,15 @@
             background-color: rgba(255, 255, 255, 0.2);
             color: #fff !important;
             transform: scale(1.05);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
         }
 
         .content {

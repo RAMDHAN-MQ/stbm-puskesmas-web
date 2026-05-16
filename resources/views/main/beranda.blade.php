@@ -52,49 +52,63 @@
     </div>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-header bg-success text-white">
-        <strong>STBM Terbaru</strong>
-    </div>
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <strong>STBM Terbaru</strong>
+            </div>
 
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Desa</th>
-                    <th>Petugas</th>
-                    <th>Status</th>
-                    <th class="text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($terbaru as $item)
-                <tr>
-                    <td>{{ $item->wilayah->desa ?? '-' }}</td>
-                    <td>{{ $item->pegawai->nama ?? '-' }}</td>
-                    <td>
-                        @if($item->status === 'selesai')
-                        <span class="badge rounded-pill text-bg-success bg-opacity-25 text-success">Selesai</span>
-                        @else
-                        <span class="badge rounded-pill text-bg-primary bg-opacity-25 text-primary">Proses</span>
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        <a href="{{ route('admin.stbm.view', $item->id) }}"
-                            class="btn btn-sm btn-outline-success">
-                            Lihat
-                        </a>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="4" class="text-center text-muted py-3">
-                        Belum ada data
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+            <div class="card-body p-1" style="height: 200px;">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Desa</th>
+                            <th>Petugas</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($terbaru as $item)
+                        <tr>
+                            <td>{{ $item->wilayah->desa ?? '-' }}</td>
+                            <td>{{ $item->pegawai->nama ?? '-' }}</td>
+                            <td>
+                                @if($item->status === 'selesai')
+                                <span class="badge rounded-pill text-bg-success bg-opacity-25 text-success">Selesai</span>
+                                @else
+                                <span class="badge rounded-pill text-bg-primary bg-opacity-25 text-primary">Proses</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ route('admin.stbm.view', $item->id) }}"
+                                    class="btn btn-sm btn-outline-success">
+                                    Lihat
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">
+                                Belum ada data
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <strong>Pegawai Pengisian STBM Terbanyak</strong>
+            </div>
+            <div class="card-body" style="height: 200px;">
+                <canvas id="pegawaiChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -125,40 +139,101 @@
 @endsection
 @push('scripts')
 <script>
-    // ===== BAR CHART DESA =====
-    const desaLabels = @json($desaData->pluck('desa'));
-    const desaLayak = @json($desaData->pluck('layak'));
-    const desaTidakLayak = @json($desaData->pluck('tidak_layak'));
+    // chart pegawai input terbanyak
+    const pegawaiLabels = @json($pegawaiChart->pluck('nama'));
 
-    new Chart(document.getElementById('desaChart'), {
+    const pegawaiTotal = @json($pegawaiChart->pluck('stbm_count'));
+
+    const pegawaiCtx = document.getElementById('pegawaiChart').getContext('2d');
+
+    new Chart(pegawaiCtx, {
+
+        type: 'bar',
+
+        data: {
+            labels: pegawaiLabels,
+
+            datasets: [{
+                label: 'Jumlah Isi STBM',
+
+                data: pegawaiTotal,
+
+                backgroundColor: 'rgba(25, 135, 84, 0.8)',
+
+                borderRadius: 8
+            }]
+        },
+
+        options: {
+            
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    // Kondisi STBM per Desa
+    const desaLabels = @json(array_values(array_keys($rekomendasi)));
+
+    const rasioLayak = @json(
+        array_values(array_map(function($d) {
+            if (($d['total_kk'] ?? 0) == 0) return 0;
+            return round(($d['kk_layak'] / $d['total_kk']) * 100, 2);
+        }, $rekomendasi))
+    );
+
+    const statusDesa = @json(
+        array_values(array_map(fn($d) => $d['status'] ?? 'Tidak Diketahui', $rekomendasi))
+    );
+
+
+    // Warna batang berdasarkan status
+    const barColors = statusDesa.map(status => {
+        if (status === 'Layak') return 'rgba(25, 135, 84, 0.8)';
+        if (status === 'Cukup') return 'rgba(255, 193, 7, 0.8)';
+        if (status === 'Tidak Layak') return 'rgba(220, 53, 69, 0.8)';
+        return 'rgba(108, 117, 125, 0.8)'; // abu
+    });
+
+    const ctx = document.getElementById('desaChart').getContext('2d');
+    new Chart(ctx, {
         type: 'bar',
         data: {
             labels: desaLabels,
-            datasets: [
-                {
-                    label: 'Layak',
-                    data: desaLayak,
-                    backgroundColor: '#198754'
-                },
-                {
-                    label: 'Tidak Layak',
-                    data: desaTidakLayak,
-                    backgroundColor: '#dc3545'
-                }
-            ]
+            datasets: [{
+                label: 'Rasio KK Layak (%)',
+                data: rasioLayak,
+                backgroundColor: barColors
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top'
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
                 }
             }
         }
     });
-
-    // ===== PIE CHART PILAR =====
+    // PIE CHART PILAR 
     new Chart(document.getElementById('pilarChart'), {
         type: 'pie',
         data: {
@@ -191,19 +266,26 @@
                         size: 12
                     },
                     formatter: (value, ctx) => {
+
+                        const label = ctx.chart.data.labels[ctx.dataIndex];
+
                         const data = ctx.chart.data.datasets[0].data;
+
                         const total = data.reduce((a, b) => a + b, 0);
-                        const percent = total ? ((value / total) * 100).toFixed(1) : 0;
-                        return percent + '%';
+
+                        const percent = total
+                            ? ((value / total) * 100).toFixed(1)
+                            : 0;
+
+                        return label + '\n' + percent + '%';
                     }
                 },
                 legend: {
-                    position: 'bottom'
-                }
+                    display: false
+                },
             }
         },
         plugins: [ChartDataLabels]
     });
-
 </script>
 @endpush

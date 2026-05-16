@@ -20,12 +20,17 @@ class RekomendasiController extends Controller
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
 
+        $jumlahTahun = $tahun->count();
         $desas = Wilayah::all();
         $pertanyaan = DB::table('pertanyaan')->get()->groupBy('pilar');
         $rekomendasi = [];
 
         foreach ($desas as $desa) {
-            $semuakk = KK::where('wilayah_id', $desa->id)->count();
+            $totalKKAsli = KK::where('wilayah_id', $desa->id)->count();
+
+            $semuakk = $filterTahun
+                ? $totalKKAsli
+                : $totalKKAsli * $jumlahTahun;
 
             $query = DB::table('stbm')
                 ->where('wilayah_id', $desa->id)
