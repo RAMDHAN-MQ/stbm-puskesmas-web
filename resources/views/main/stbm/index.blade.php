@@ -100,7 +100,7 @@
                                 <button type="button"
                                     class="dropdown-item text-danger btn-delete"
                                     data-id="{{ $item->id }}"
-                                    data-wilayah="{{ $item->wilayah }}">
+                                    data-nama="{{ $item->kk->nama_kepala_kk ?? '-' }}">
                                     <i class="bi bi-trash me-2"></i> Hapus
                                 </button>
                             </li>
@@ -230,14 +230,14 @@
     document.querySelectorAll('.btn-delete').forEach(button => {
         button.addEventListener('click', function() {
             const id = this.dataset.id;
-            const wilayah = this.dataset.wilayah;
+            const nama = this.dataset.nama;
 
             Swal.fire({
                 title: 'Yakin ingin menghapus?',
                 html: `
                 <p>
                     Data STBM
-                    <strong style="color:#dc3545">${wilayah}</strong>
+                    <strong style="color:#dc3545">${nama}</strong>
                     akan dihapus permanen!
                 </p>
             `,

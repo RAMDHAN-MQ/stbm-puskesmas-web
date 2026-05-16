@@ -27,7 +27,8 @@ Route::get('/statistik', [RekomendasiController::class, 'statistik']);
 
 // riwayat
 Route::get('/stbm', [StbmController::class, 'indexHP']);
-Route::get('/stbm/{id}', [StbmController::class, 'showHP']);
+Route::get('/stbm/listdesa', [StbmController::class, 'listdesa']);
+Route::get('/stbm/{id}/pilar/{pilar}', [StbmController::class, 'pilarDetail']);
 
 // STBM MOBILE
 // kk dropdown

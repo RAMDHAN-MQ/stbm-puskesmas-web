@@ -123,7 +123,7 @@
             <tr>
                 <th>Bukti Pelaporan</th>
                 <td>
-                    <img src="" alt="Bukti Pelaporan">
+                    <img src="{{ asset('storage/stbm/'. $stbm->bukti) }}" alt="logo stbm" width="200px">
                 </td>
             </tr>
 

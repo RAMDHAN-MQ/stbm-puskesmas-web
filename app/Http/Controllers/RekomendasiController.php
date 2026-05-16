@@ -178,22 +178,21 @@ class RekomendasiController extends Controller
     // statistik di mobile stbm
     public function statistik(Request $request)
     {
-        $pegawaiId = $request->pegawai_id;
         $tahun = $request->tahun;
 
-        $tahunList = Stbm::where('pegawai_id', $pegawaiId)
-            ->select(DB::raw('YEAR(created_at) as tahun'))
+        $tahunList = Stbm::select(DB::raw('YEAR(created_at) as tahun'))
             ->distinct()
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
 
-        $query = Stbm::where('pegawai_id', $pegawaiId);
+        $baseQuery = Stbm::query();
 
         if ($tahun) {
-            $query->whereYear('created_at', $tahun);
+            $baseQuery->whereYear('created_at', $tahun);
         }
-
-        $perDesa = $query->select('wilayah_id', DB::raw('count(*) as total'))
+        $perDesa = $baseQuery
+            ->clone()
+            ->select('wilayah_id', DB::raw('count(*) as total'))
             ->with('wilayah')
             ->groupBy('wilayah_id')
             ->get()
@@ -203,18 +202,15 @@ class RekomendasiController extends Controller
                     'total' => $item->total,
                 ];
             });
-
         $pilar = [];
 
         for ($i = 1; $i <= 5; $i++) {
-            $pilar["pilar_$i"] = [
-                'layak' => Stbm::where('pegawai_id', $pegawaiId)
-                    ->when($tahun, fn($q) => $q->whereYear('created_at', $tahun))
+            $pilar[$i] = [
+                'layak' => (clone $baseQuery)
                     ->where("pilar_$i", 'layak')
                     ->count(),
 
-                'tidak_layak' => Stbm::where('pegawai_id', $pegawaiId)
-                    ->when($tahun, fn($q) => $q->whereYear('created_at', $tahun))
+                'tidak_layak' => (clone $baseQuery)
                     ->where("pilar_$i", 'tidak_layak')
                     ->count(),
             ];

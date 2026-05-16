@@ -15,6 +15,7 @@ class Stbm extends Model
         'no_kk',
         'wilayah_id',
         'status',
+        'bukti',
         'pilar_1',
         'pilar_2',
         'pilar_3',

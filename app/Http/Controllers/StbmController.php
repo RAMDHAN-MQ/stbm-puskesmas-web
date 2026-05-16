@@ -12,14 +12,15 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StbmExport;
 use App\Models\KK;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class StbmController extends Controller
 {
     public function index()
     {
         $stbm = Stbm::with(['wilayah', 'pegawai'])
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
         $kk = KK::all();
         $desa = Wilayah::orderBy('desa')->get();
 
@@ -120,22 +121,64 @@ class StbmController extends Controller
     public function indexHP(Request $request)
     {
         $pegawaiId = $request->pegawai_id;
-            
+        $desa = $request->desa;
+        $search = $request->search;
+
         $stbm = Stbm::with(['wilayah', 'pegawai', 'kk'])
             ->where('pegawai_id', $pegawaiId)
+
+            ->when($desa, function ($q) use ($desa) {
+                $q->whereHas('wilayah', function ($w) use ($desa) {
+                    $w->where('desa', $desa);
+                });
+            })
+
+            ->when($search, function ($q) use ($search) {
+                $q->whereHas('kk', function ($k) use ($search) {
+                    $k->where('nama_kepala_kk', 'like', "%$search%")
+                        ->orWhere('no_kk', 'like', "%$search%");
+                });
+            })
+
             ->latest()
-            ->get();
+            ->paginate(5); // 👈 FIX 5 DATA PER HALAMAN
 
         return response()->json($stbm);
     }
 
-    // 3. Tampil STBM spesifik (opsional)
-    public function showHP($id)
+    public function listDesa(Request $request)
     {
-        $data = Stbm::with(['wilayah', 'pegawai', 'kk'])
-            ->findOrFail($id);
+        $pegawaiId = $request->pegawai_id;
 
-        return response()->json($data);
+        $desa = Stbm::with('wilayah')
+            ->where('pegawai_id', $pegawaiId)
+            ->select('wilayah_id')
+            ->distinct()
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'desa' => $item->wilayah->desa,
+                ];
+            })
+            ->unique('desa')
+            ->values();
+
+        return response()->json($desa);
+    }
+
+    // 3. Tampil STBM spesifik (opsional)
+    public function pilarDetail($id, $pilar)
+    {
+        $data = Pertanyaan::where('pilar', $pilar)
+            ->with(['stbmDetails' => function ($q) use ($id) {
+                $q->where('stbm_id', $id);
+            }])
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
     }
 
     // kk dropdown
@@ -165,16 +208,26 @@ class StbmController extends Controller
         DB::beginTransaction();
 
         try {
+            $filename = null;
+
+            if ($request->hasFile('bukti')) {
+                $file = $request->file('bukti');
+                $filename = time() . '_' . $file->getClientOriginalName();
+
+                $buktiPath = $file->storeAs('stbm', $filename, 'public');
+            }
+
             $stbm = Stbm::create([
                 'pegawai_id' => $request->pegawai_id,
                 'wilayah_id' => $request->wilayah_id,
                 'no_kk' => $request->no_kk,
+                'bukti' => $filename,
                 'status' => 'proses',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            foreach ($request->jawaban as $j) {
+            foreach (json_decode($request->jawaban, true) as $j) {
                 StbmDetail::create([
                     'stbm_id' => $stbm->id,
                     'pertanyaan_id' => $j['pertanyaan_id'],
@@ -187,6 +240,7 @@ class StbmController extends Controller
             return response()->json([
                 'message' => 'STBM berhasil disimpan',
                 'stbm_id' => $stbm->id,
+                'bukti' => $buktiPath,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
