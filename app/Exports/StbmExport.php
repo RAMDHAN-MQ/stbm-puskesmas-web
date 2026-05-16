@@ -52,7 +52,7 @@ class StbmExport implements
     {
         return [
             ++$this->no,
-            $item->no_kk,
+            "'".$item->no_kk,
             $item->kk->nama_kepala_kk,
             $item->wilayah->desa ?? '-',
             str_pad($item->kk->rt, 3, '0', STR_PAD_LEFT),
