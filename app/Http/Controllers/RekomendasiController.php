@@ -185,7 +185,8 @@ class RekomendasiController extends Controller
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
 
-        $baseQuery = Stbm::query();
+        $baseQuery = Stbm::query()
+            ->where('status', 'selesai');
 
         if ($tahun) {
             $baseQuery->whereYear('created_at', $tahun);
