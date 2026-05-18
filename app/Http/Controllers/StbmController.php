@@ -13,6 +13,7 @@ use App\Exports\StbmExport;
 use App\Models\KK;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class StbmController extends Controller
 {
@@ -42,6 +43,13 @@ class StbmController extends Controller
     public function destroy($id)
     {
         $stbm = Stbm::findOrFail($id);
+
+        if ($stbm->bukti) {
+            $path = 'stbm/' . $stbm->bukti;
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
         $stbm->delete();
 
         return redirect()
@@ -141,7 +149,7 @@ class StbmController extends Controller
             })
 
             ->latest()
-            ->paginate(5); // 👈 FIX 5 DATA PER HALAMAN
+            ->paginate(5);
 
         return response()->json($stbm);
     }
@@ -240,7 +248,7 @@ class StbmController extends Controller
             return response()->json([
                 'message' => 'STBM berhasil disimpan',
                 'stbm_id' => $stbm->id,
-                'bukti' => $buktiPath,
+                'bukti' => $filename,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
