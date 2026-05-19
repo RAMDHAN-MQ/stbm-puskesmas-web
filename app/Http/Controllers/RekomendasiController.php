@@ -176,23 +176,15 @@ class RekomendasiController extends Controller
     }
 
     // statistik di mobile stbm
-    public function statistik(Request $request)
+    public function statistik()
     {
-        $tahun = $request->tahun;
-
-        $tahunList = Stbm::select(DB::raw('YEAR(created_at) as tahun'))
-            ->distinct()
-            ->orderBy('tahun', 'desc')
-            ->pluck('tahun');
+        $tahunSekarang = now()->year;
 
         $baseQuery = Stbm::query()
-            ->where('status', 'selesai');
+            ->where('status', 'selesai')
+            ->whereYear('created_at', $tahunSekarang);
 
-        if ($tahun) {
-            $baseQuery->whereYear('created_at', $tahun);
-        }
-        $perDesa = $baseQuery
-            ->clone()
+        $perDesa = (clone $baseQuery)
             ->select('wilayah_id', DB::raw('count(*) as total'))
             ->with('wilayah')
             ->groupBy('wilayah_id')
@@ -203,6 +195,7 @@ class RekomendasiController extends Controller
                     'total' => $item->total,
                 ];
             });
+
         $pilar = [];
 
         for ($i = 1; $i <= 5; $i++) {
@@ -218,7 +211,7 @@ class RekomendasiController extends Controller
         }
 
         return response()->json([
-            'tahun_list' => $tahunList,
+            'tahun' => $tahunSekarang,
             'per_desa' => $perDesa,
             'pilar' => $pilar,
         ]);
